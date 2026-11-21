@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+# 個人錄製資料（瀏覽紀錄、截圖、視線資料）
+sessions/
+# 設計提案頁使用了真實錄製的截圖與資料
+design-options/

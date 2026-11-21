@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>視線回放</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&family=Chiron+Hei+HK:wght@400;600&display=swap" rel="stylesheet">
+<style>/*__RRWEB_CSS__*/</style>
+<style>
+  /* 設計符號：顏色、字體、圓角、線寬。各風格只覆寫這些值 */
+  :root, :root[data-theme="graphite"] {
+    --bay: #2E3136; --well: #25282C; --deep: #1E2024; --line: #3D4147; --text: #D7DADF; --muted: #8B9099;
+    --head: #FFFFFF; --head-ink: #1E2024; --head-hover: #E8EAED;
+    --gaze: #FF5D73; --fix: #9BD17A; --fix-ink: #1E2024; --mouse: #5FD3E0; --click: #FFC24B; --sel: #5FA8D3; --heat-chip: #FF8A3D;
+    --label-bg: rgba(20,22,26,.82); --label-fix: #E6F4DC; --label-click: #FFE3A8;
+    --clip-s: 65%; --clip-l: 58%; --clip-ink: #1E2024; --dim: rgba(0,0,0,.28); --sel-bg: rgba(95,168,211,.18); --backdrop: rgba(0,0,0,.55);
+    --font: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; --font-head: var(--font); --head-weight: 700;
+    --radius: 2px; --panel-radius: 0px; --bw: 1px; --gap: 8px;
+    --split: 58%;
+  }
+  /* 調色室：深藍、琥珀，低眩光 */
+  :root[data-theme="darkroom"] {
+    --bay: #111723; --well: #0D121B; --deep: #0A0E15; --line: #223047; --text: #CFD8E6; --muted: #7387A3;
+    --head: #F2F5FA; --head-ink: #0A0E15; --head-hover: #D8E2F0;
+    --gaze: #FF6B57; --fix: #F2B84B; --fix-ink: #1A1206; --mouse: #4FD1C5; --click: #B794F4; --sel: #4FA3F7; --heat-chip: #FF6B57;
+    --label-bg: rgba(8,12,20,.85); --label-fix: #FCE7BF; --label-click: #E2D4FD;
+    --clip-s: 50%; --clip-l: 55%; --clip-ink: #0A0E15; --dim: rgba(2,6,14,.45); --sel-bg: rgba(79,163,247,.16); --backdrop: rgba(2,6,14,.7);
+    --font: "Chiron Hei HK", "Noto Sans TC", "Microsoft JhengHei", sans-serif; --font-head: var(--font); --head-weight: 600;
+    --radius: 6px; --panel-radius: 10px; --bw: 1px; --gap: 10px;
+  }
+  /* 淺色實驗室：白底、細線，適合白天與投影 */
+  :root[data-theme="lab"] {
+    --bay: #E9ECF0; --well: #F6F7F9; --deep: #FFFFFF; --line: #D3D8DF; --text: #1F2430; --muted: #687080;
+    --head: #1F2430; --head-ink: #FFFFFF; --head-hover: #39404F;
+    --gaze: #E5484D; --fix: #2F9E44; --fix-ink: #FFFFFF; --mouse: #0C8599; --click: #E8590C; --sel: #3B5BDB; --heat-chip: #E8590C;
+    --label-bg: rgba(255,255,255,.92); --label-fix: #1B5E2B; --label-click: #8A3505;
+    --clip-s: 60%; --clip-l: 74%; --clip-ink: #1F2430; --dim: rgba(31,36,48,.18); --sel-bg: rgba(59,91,219,.12); --backdrop: rgba(31,36,48,.35);
+    --font: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; --font-head: var(--font); --head-weight: 700;
+    --radius: 6px; --panel-radius: 8px; --bw: 1px; --gap: 10px;
+  }
+  /* 高對比：純黑、粗線、飽和色，最容易辨識 */
+  :root[data-theme="contrast"] {
+    --bay: #000000; --well: #000000; --deep: #000000; --line: #FFFFFF; --text: #FFFFFF; --muted: #D6D6D6;
+    --head: #FFE600; --head-ink: #000000; --head-hover: #FFF27A;
+    --gaze: #FF3B30; --fix: #00E676; --fix-ink: #000000; --mouse: #00B0FF; --click: #FFE600; --sel: #FF4FD8; --heat-chip: #FF3B30;
+    --label-bg: #000000; --label-fix: #00E676; --label-click: #FFE600;
+    --clip-s: 100%; --clip-l: 62%; --clip-ink: #000000; --dim: rgba(0,0,0,.55); --sel-bg: rgba(255,79,216,.25); --backdrop: rgba(0,0,0,.8);
+    --font: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; --font-head: var(--font); --head-weight: 700;
+    --radius: 0px; --panel-radius: 0px; --bw: 2px; --gap: 8px;
+  }
+  /* 研究報告：冷白紙面、墨藍字、視網膜紅，標題用明體 */
+  :root[data-theme="paper"] {
+    --bay: #E6EAEE; --well: #F3F5F7; --deep: #FBFCFD; --line: #C2CBD4; --text: #13243A; --muted: #5C6B7A;
+    --head: #13243A; --head-ink: #FBFCFD; --head-hover: #24385A;
+    --gaze: #C42B3B; --fix: #2D6A9F; --fix-ink: #FFFFFF; --mouse: #2D8FA3; --click: #B7791F; --sel: #2D6A9F; --heat-chip: #C42B3B;
+    --label-bg: rgba(251,252,253,.94); --label-fix: #13243A; --label-click: #7A4E0E;
+    --clip-s: 35%; --clip-l: 78%; --clip-ink: #13243A; --dim: rgba(19,36,58,.16); --sel-bg: rgba(45,106,159,.12); --backdrop: rgba(19,36,58,.4);
+    --font: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; --font-head: "Noto Serif TC", "PMingLiU", serif; --head-weight: 700;
+    --radius: 0px; --panel-radius: 0px; --bw: 1px; --gap: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bay); color: var(--text); font: 13px/1.5 var(--font);
+         display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+  button, select, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
+
+  .top { display: flex; align-items: center; gap: 18px; padding: 6px 12px; background: var(--deep); border-bottom: var(--bw) solid var(--line); }
+  .top h1 { margin: 0; font: var(--head-weight) 15px/1.3 var(--font-head); color: var(--head); }
+  .top .info { display: flex; gap: 16px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+  .top .info b { color: var(--text); font-weight: 500; }
+  .top .export { margin-left: auto; background: var(--head); color: var(--head-ink); border: 0; height: 28px; padding: 0 14px; font-weight: 700; cursor: pointer; border-radius: var(--radius); }
+  .top .export:hover { background: var(--head-hover); }
+  .themepick { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
+  .themepick select { background: var(--well); border: var(--bw) solid var(--line); border-radius: var(--radius); height: 28px; padding: 0 6px; }
+  .top .themepick + .export, .top .langpick { margin-left: 0; }
+
+  /* 上方兩個監看視窗＋可拖曳分隔 */
+  .monitors { display: flex; padding: var(--gap); min-height: 0; }
+  .mon { background: var(--deep); border: var(--bw) solid var(--line); border-radius: var(--panel-radius); overflow: hidden; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .viewer-mon { flex: 0 0 var(--split); }
+  .map-mon { flex: 1 1 0; }
+  .mon h2 { margin: 0; padding: 5px 10px; font: 500 12px/1.4 var(--font); color: var(--muted); border-bottom: var(--bw) solid var(--line);
+            display: flex; gap: 10px; align-items: center; min-height: 31px; }
+  .mon h2 > span:first-child { font: var(--head-weight) 13px/1.4 var(--font-head); color: var(--text); }
+  .mon h2 .right { margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .splitter { flex: 0 0 8px; cursor: col-resize; position: relative; touch-action: none; }
+  .splitter::before { content: ""; position: absolute; left: 3px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+  .splitter:hover::before, .splitter.dragging::before, .splitter:focus-visible::before { background: var(--sel); }
+  .splitter::after { content: ""; position: absolute; left: 1px; top: 50%; width: 6px; height: 36px; margin-top: -18px; border-radius: 3px;
+                     background: var(--line); }
+  .splitter:hover::after, .splitter.dragging::after { background: var(--sel); }
+  body.resizing, body.resizing * { cursor: col-resize !important; user-select: none; }
+  body.resizing iframe { pointer-events: none; }
+
+  #stage { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+  #stage .replayer-wrapper { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+  #stage iframe { border: 0; background: #fff; }
+  #overlay { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 10; }
+  .msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 20px; text-align: center; }
+
+  .layers { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 10px; border-bottom: var(--bw) solid var(--line); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border: var(--bw) solid var(--line); border-radius: 999px;
+          background: transparent; cursor: pointer; color: var(--muted); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); opacity: .35; }
+  .chip[aria-pressed="true"] { color: var(--text); border-color: var(--c); }
+  .chip[aria-pressed="true"] i { opacity: 1; }
+  .layers .sep { width: 1px; height: 16px; background: var(--line); margin: 0 4px; }
+  .layers select { background: var(--well); border: var(--bw) solid var(--line); border-radius: var(--radius); height: 24px; padding: 0 6px; }
+  #mapWrap { flex: 1; overflow: auto; position: relative; min-height: 0; }
+  #mapInner { position: relative; margin: 0 auto; }
+  #mapInner canvas { display: block; }
+  #mapFx { position: absolute; left: 0; top: 0; }
+  #vpbox { position: absolute; left: 0; right: 0; border: 1.5px solid var(--head); box-shadow: 0 0 0 9999px var(--dim); pointer-events: none; display: none; }
+  .mapnote { padding: 4px 10px; color: var(--muted); font-size: 12px; border-top: var(--bw) solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 播放列 */
+  .transport { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--well); border-top: var(--bw) solid var(--line); border-bottom: var(--bw) solid var(--line); min-width: 0; }
+  .tbtn { background: var(--bay); border: var(--bw) solid var(--line); height: 28px; min-width: 32px; padding: 0 10px; cursor: pointer; border-radius: var(--radius); }
+  .tbtn:hover:not(:disabled) { border-color: var(--muted); }
+  .tbtn:disabled { opacity: .35; cursor: default; }
+  .tc { font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 500; color: var(--head); padding: 0 6px; white-space: nowrap; }
+  .tc small { color: var(--muted); font-size: 13px; }
+  .transport select { background: var(--bay); border: var(--bw) solid var(--line); border-radius: var(--radius); height: 28px; padding: 0 4px; }
+  .transport label { color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+  .seginfo { margin-left: auto; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .seginfo b { color: var(--text); font-weight: 500; }
+  .selinfo { display: none; align-items: center; gap: 6px; white-space: nowrap; color: var(--sel); }
+  .selinfo.on { display: flex; }
+  .selinfo button { background: none; border: 1px solid var(--sel); color: var(--sel); height: 24px; padding: 0 8px; cursor: pointer; border-radius: var(--radius); }
+
+  /* 多軌時間軸 */
+  .tracks { display: grid; grid-template-columns: 88px minmax(0, 1fr) 92px; background: var(--well); user-select: none; }
+  .navs > div { height: 26px; border-bottom: 1px solid var(--deep); border-left: var(--bw) solid var(--line); }
+  .navs .r { height: 22px; background: var(--deep); }
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 2px; padding: 0 4px; }
+  .nav button { width: 22px; height: 20px; padding: 0; border: var(--bw) solid var(--line); background: var(--bay); border-radius: var(--radius);
+                cursor: pointer; font-size: 10px; line-height: 1; color: var(--text); }
+  .nav button:hover:not(:disabled) { border-color: var(--muted); }
+  .nav button:disabled { opacity: .3; cursor: default; }
+  .nav .cnt { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; white-space: nowrap; text-align: center; flex: 1; }
+  .labels div { height: 26px; padding: 0 10px; display: flex; align-items: center; color: var(--muted); border-bottom: 1px solid var(--deep); border-right: 1px solid var(--line); }
+  .labels .r { height: 22px; font-size: 11px; }
+  #lanes { position: relative; overflow: hidden; }
+  .lane { position: relative; height: 26px; border-bottom: 1px solid var(--deep); }
+  .ruler { height: 22px; cursor: text; background: var(--deep); }
+  .ruler span { position: absolute; top: 3px; font-size: 11px; color: var(--muted); transform: translateX(-50%); font-variant-numeric: tabular-nums; pointer-events: none; }
+  .ruler i { position: absolute; bottom: 0; width: 1px; height: 7px; background: var(--muted); }
+  .ruler i.mn { height: 3px; background: var(--line); }
+  #hscroll { min-width: 0; height: 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+  #hsInner { height: 1px; width: 100%; }
+  .zoomctl { color: var(--muted); }
+  .zoomctl input { width: 130px; accent-color: var(--sel); }
+  #zoomVal { min-width: 3.4em; color: var(--text); font-variant-numeric: tabular-nums; }
+  .clip { position: absolute; top: 3px; bottom: 3px; border-radius: 3px; padding: 0 6px; font-size: 11px; line-height: 20px; color: var(--clip-ink);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; border: 0; text-align: left; background: hsl(var(--h) var(--clip-s) var(--clip-l)); }
+  .clip[aria-current="true"] { outline: 2px solid var(--head); outline-offset: 1px; }
+  .fixbar { position: absolute; top: 8px; height: 10px; background: var(--fix); border-radius: 2px; }
+  .ctick { position: absolute; top: 5px; width: 2px; height: 16px; background: var(--click); }
+  .lane svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--head); pointer-events: none; z-index: 3; }
+  #playhead::before { content: ""; position: absolute; top: 0; left: -5px; border: 6px solid transparent; border-top-color: var(--head); }
+  #selbox { position: absolute; top: 0; bottom: 0; background: var(--sel-bg); border-left: 1px solid var(--sel); border-right: 1px solid var(--sel); pointer-events: none; display: none; z-index: 2; }
+
+  /* 匯出對話框 */
+  dialog { background: var(--bay); color: var(--text); border: var(--bw) solid var(--line); border-radius: max(var(--panel-radius), var(--radius)); padding: 0; width: min(620px, 94vw); max-height: 88vh; }
+  dialog::backdrop { background: var(--backdrop); }
+  dialog form { display: flex; flex-direction: column; max-height: 88vh; }
+  dialog h2 { margin: 0; padding: 14px 18px; font: var(--head-weight) 17px/1.3 var(--font-head); border-bottom: var(--bw) solid var(--line); color: var(--head); }
+  .dbody { padding: 12px 18px; overflow: auto; }
+  fieldset { border: 1px solid var(--line); border-radius: 4px; margin: 0 0 12px; padding: 10px 12px; }
+  legend { color: var(--muted); padding: 0 6px; }
+  .opt { display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer; }
+  .vlist { margin: 6px 0 4px 24px; display: flex; flex-direction: column; gap: 2px; max-height: 210px; overflow: auto; }
+  .vrow { display: grid; grid-template-columns: 18px 36px 116px 1fr auto; gap: 8px; align-items: center; padding: 3px 4px; border-radius: 3px; cursor: pointer; }
+  .vrow:hover { background: var(--well); }
+  .vrow .t { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .vrow .ti { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vrow .c { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .mini { display: flex; gap: 8px; margin: 2px 0 0 24px; }
+  .mini button { background: none; border: 0; color: var(--sel); cursor: pointer; padding: 0; }
+  .range { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 6px 0 0 24px; }
+  .range input { width: 92px; background: var(--well); border: 1px solid var(--line); padding: 4px 6px; font-variant-numeric: tabular-nums; }
+  .hint { color: var(--muted); font-size: 12px; }
+  .files { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+  .summary { color: var(--muted); margin: 4px 0 0; }
+  .summary b { color: var(--text); font-weight: 500; }
+  .dfoot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); }
+  .dfoot button { height: 32px; padding: 0 16px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--line); background: var(--well); }
+  .dfoot .primary { background: var(--head); color: var(--head-ink); border-color: var(--head); font-weight: 700; }
+  .dfoot .primary:disabled { opacity: .4; cursor: default; }
+  .error { color: var(--gaze); }
+
+  .top h1, .top .export { white-space: nowrap; flex: none; }
+  @media (max-width: 860px) {
+    html, body { height: auto; }
+    body { overflow: auto; grid-template-rows: auto auto auto auto; }
+    .monitors { min-height: auto; }
+    .top .info span:nth-child(n+3) { display: none; }
+    .monitors { flex-direction: column; gap: 8px; }
+    .viewer-mon { flex: none; height: 56vw; min-height: 220px; }
+    .map-mon { flex: none; height: 70vh; }
+    .splitter { display: none; }
+    .transport { flex-wrap: wrap; }
+    .seginfo { display: none; }
+    .tracks { grid-template-columns: 64px minmax(0, 1fr) 84px; }
+    .zoomctl > span:first-child { display: none; }
+    .top { flex-wrap: wrap; row-gap: 6px; }
+    .top .info { order: 5; width: 100%; }
+    .zoomctl input { width: 90px; }
+    .langpick > span, .themepick > span { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 data-i18n="title">視線回放</h1>
+  <div class="info" id="info"></div>
+  <label class="themepick"><span data-i18n="theme">風格</span> <select id="themeSel" data-i18n-aria="theme"></select></label>
+  <label class="themepick langpick"><span data-i18n="lang">語言</span> <select id="langSel" data-i18n-aria="lang"><option value="zh">中文</option><option value="en">English</option></select></label>
+  <button class="export" id="exportBtn" data-i18n="export">匯出</button>
+</header>
+
+<section class="monitors" id="monitors">
+  <div class="mon viewer-mon">
+    <h2><span data-i18n="viewer">網站回放</span><span class="right" id="vpinfo"></span></h2>
+    <div id="stage"><canvas id="overlay"></canvas></div>
+  </div>
+  <div class="splitter" id="splitter" role="separator" tabindex="0" aria-orientation="vertical" data-i18n-aria="splitter" aria-valuemin="20" aria-valuemax="80"></div>
+  <div class="mon map-mon">
+    <h2><span data-i18n="map">整頁視線圖</span><span class="right" id="segTitle"></span></h2>
+    <div class="layers" role="group" data-i18n-aria="layers">
+      <button class="chip" data-layer="heat" style="--c:var(--heat-chip)" aria-pressed="false"><i></i><span data-i18n="l.heat">熱點</span></button>
+      <button class="chip" data-layer="path" style="--c:var(--fix)" aria-pressed="true"><i></i><span data-i18n="l.path">路徑</span></button>
+      <button class="chip" data-layer="mouse" style="--c:var(--mouse)" aria-pressed="false"><i></i><span data-i18n="l.mouse">滑鼠位置</span></button>
+      <button class="chip" data-layer="clicks" style="--c:var(--click)" aria-pressed="true"><i></i><span data-i18n="l.clicks">點擊</span></button>
+      <span class="sep"></span>
+      <button class="chip" data-layer="labels" style="--c:var(--text)" aria-pressed="true"><i></i><span data-i18n="l.labels">標註時間</span></button>
+      <select id="bgSel" data-i18n-aria="bg"><option value="shot" data-i18n="bg.shot">完整長截圖</option><option value="tiles" data-i18n="bg.tiles">錄製當下畫面</option></select>
+    </div>
+    <div id="mapWrap"><div id="mapInner"><canvas id="mapBg"></canvas><canvas id="mapFx"></canvas><div id="vpbox"></div></div></div>
+    <div class="mapnote" id="mapNote"></div>
+  </div>
+</section>
+
+<div class="transport">
+  <button class="tbtn" id="prev" data-i18n-aria="prevSeg" data-i18n-title="prevSegKey">|◀</button>
+  <button class="tbtn" id="play" data-i18n-aria="play" data-i18n-title="playKey">▶</button>
+  <button class="tbtn" id="next" data-i18n-aria="nextSeg" data-i18n-title="nextSegKey">▶|</button>
+  <span class="tc" id="tc"></span>
+  <select id="speed" data-i18n-aria="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+  <label><span data-i18n="trail">軌跡</span> <select id="trail"><option value="300" data-i18n="s03">0.3 秒</option><option value="1000" selected data-i18n="s1">1 秒</option><option value="3000" data-i18n="s3">3 秒</option></select></label>
+  <span class="selinfo" id="selinfo"><span aria-hidden="true">↻</span><span id="seltext"></span><button id="selClear" data-i18n="loopClear">停止循環</button></span>
+  <label class="zoomctl"><span data-i18n="zoom">時間軸縮放</span><input type="range" id="zoom" min="0" max="1000" value="0" data-i18n-aria="zoom"><span id="zoomVal">1×</span></label>
+  <button class="tbtn" id="zoomFit" data-i18n="fit" data-i18n-title="fitTip">全部</button>
+  <span class="seginfo" id="seginfo"></span>
+</div>
+
+<section class="tracks">
+  <div class="labels">
+    <div class="r" data-i18n="lane.time" data-i18n-title="rulerTip">時間</div>
+    <div data-i18n="lane.visit">段落</div><div data-i18n="lane.fix">注視點</div><div data-i18n="lane.click">點擊</div>
+    <div data-i18n="lane.scroll">捲動</div><div data-i18n="lane.x">水平視線</div>
+  </div>
+  <div id="lanes">
+    <div class="lane ruler" id="ruler" data-i18n-title="rulerTip"></div>
+    <div class="lane" id="laneVisit"></div>
+    <div class="lane" id="laneFix"></div>
+    <div class="lane" id="laneClick"></div>
+    <div class="lane" id="laneScroll"></div>
+    <div class="lane" id="laneX"></div>
+    <div id="selbox"></div>
+    <div id="playhead"></div>
+  </div>
+  <!-- 右側：跳到上一個／下一個時間點 -->
+  <div class="navs">
+    <div class="r"></div>
+    <div class="nav" data-kind="visit"><button data-dir="-1" data-i18n-aria="nav.visit.prev" data-i18n-title="nav.visit.prev">◀</button><span class="cnt"></span><button data-dir="1" data-i18n-aria="nav.visit.next" data-i18n-title="nav.visit.next">▶</button></div>
+    <div class="nav" data-kind="fix"><button data-dir="-1" data-i18n-aria="nav.fix.prev" data-i18n-title="nav.fix.prev">◀</button><span class="cnt"></span><button data-dir="1" data-i18n-aria="nav.fix.next" data-i18n-title="nav.fix.next">▶</button></div>
+    <div class="nav" data-kind="click"><button data-dir="-1" data-i18n-aria="nav.click.prev" data-i18n-title="nav.click.prev">◀</button><span class="cnt"></span><button data-dir="1" data-i18n-aria="nav.click.next" data-i18n-title="nav.click.next">▶</button></div>
+    <div></div><div></div>
+  </div>
+  <div class="hs-pad"></div><div id="hscroll" data-i18n-title="rulerTip"><div id="hsInner"></div></div><div class="hs-pad"></div>
+</section>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgTitle" data-i18n="dlg.title">匯出資料</h2>
+    <div class="dbody">
+      <fieldset>
+        <legend data-i18n="dlg.scope">範圍</legend>
+        <label class="opt"><input type="radio" name="scope" value="visits" checked> <span data-i18n="dlg.visits">選擇段落</span></label>
+        <div class="vlist" id="vlist"></div>
+        <div class="mini"><button type="button" id="allV" data-i18n="dlg.all">全選</button><button type="button" id="noneV" data-i18n="dlg.none">全不選</button><button type="button" id="curV" data-i18n="dlg.cur">只選目前段落</button></div>
+        <label class="opt" style="margin-top:10px"><input type="radio" name="scope" value="range"> <span data-i18n="dlg.range">時間範圍</span></label>
+        <div class="range">
+          <label><span data-i18n="dlg.start">開始</span> <input id="rangeA" inputmode="decimal" placeholder="0:00.0"></label>
+          <label><span data-i18n="dlg.end">結束</span> <input id="rangeB" inputmode="decimal" placeholder="0:00.0"></label>
+          <span class="hint" data-i18n="dlg.hint">格式「分:秒」，例如 1:05.5</span>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend data-i18n="dlg.content">內容</legend>
+        <div class="files">
+          <label class="opt"><input type="checkbox" name="f" value="gaze" checked> <span data-i18n="f.gaze">視線樣本</span> gaze.csv</label>
+          <label class="opt"><input type="checkbox" name="f" value="fixations" checked> <span data-i18n="f.fix">注視點</span> fixations.csv</label>
+          <label class="opt"><input type="checkbox" name="f" value="clicks" checked> <span data-i18n="f.clicks">點擊</span> clicks.csv</label>
+          <label class="opt"><input type="checkbox" name="f" value="mouse"> <span data-i18n="f.mouse">滑鼠軌跡</span> mouse.csv</label>
+          <label class="opt"><input type="checkbox" name="f" value="visits" checked> <span data-i18n="f.visits">段落表</span> visits.csv</label>
+        </div>
+      </fieldset>
+      <p class="summary" id="summary"></p>
+    </div>
+    <div class="dfoot">
+      <button value="cancel" formnovalidate data-i18n="cancel">取消</button>
+      <button class="primary" id="doExport" value="default" data-i18n="download">下載 ZIP</button>
+    </div>
+  </form>
+</dialog>
+
+<script>/*__RRWEB_JS__*/</script>
+<script id="data" type="application/json">__DATA_JSON__</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const $ = (id) => document.getElementById(id);
+  const m = D.meta, S0 = m.started_ms, S1 = m.ended_ms, T = Math.max(0.1, (S1 - S0) / 1000);
+  const V = D.visits || [];
+  const rel = (ep) => (ep - S0) / 1000;
+  const fmt = (s) => { s = Math.max(0, s); return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`; };
+  const parseT = (str) => {
+    const s = String(str).trim(); if (!s) return NaN;
+    const p = s.split(':'); return p.length === 2 ? (+p[0]) * 60 + parseFloat(p[1]) : parseFloat(s);
+  };
+  const lower = (arr, x) => { let lo = 0, hi = arr.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid][0] < x) lo = mid + 1; else hi = mid; } return lo; };
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} } };
+  const TAB_HUES = [38, 205, 140, 280, 12, 330, 180];
+
+  // ---------- 語言 ----------
+  const I18N = {
+    zh: {
+      title: '視線回放', theme: '風格', lang: '語言', export: '匯出', viewer: '網站回放', map: '整頁視線圖',
+      splitter: '拖曳調整回放與視線圖的比例', layers: '視線圖顯示內容',
+      'l.heat': '熱點', 'l.path': '路徑', 'l.mouse': '滑鼠位置', 'l.clicks': '點擊', 'l.labels': '標註時間',
+      bg: '背景', 'bg.shot': '完整長截圖', 'bg.tiles': '錄製當下畫面',
+      prevSeg: '上一段', nextSeg: '下一段', prevSegKey: '上一段（←）', nextSegKey: '下一段（→）',
+      play: '播放', pause: '暫停', playKey: '播放／暫停（空白鍵）', speed: '播放速度', trail: '軌跡',
+      s03: '0.3 秒', s1: '1 秒', s3: '3 秒',
+      loopText: '循環播放 {a} – {b}（{d} 秒）', loopClear: '停止循環', zoom: '時間軸縮放', fit: '全部', fitTip: '顯示整段錄製（按 0）',
+      'lane.time': '時間', 'lane.visit': '段落', 'lane.fix': '注視點', 'lane.click': '點擊', 'lane.scroll': '捲動', 'lane.x': '水平視線',
+      rulerTip: '尺規上拖曳設定循環播放區段，點一下跳到該時間；滾輪縮放，Shift＋滾輪左右移動',
+      'nav.visit.prev': '上一個段落', 'nav.visit.next': '下一個段落', 'nav.fix.prev': '上一個注視點', 'nav.fix.next': '下一個注視點',
+      'nav.click.prev': '上一次點擊', 'nav.click.next': '下一次點擊',
+      'info.date': '日期', 'info.source': '來源', 'info.duration': '時長', 'info.visits': '段落', 'info.acc': '校正誤差',
+      'src.webcam': '攝影機', 'src.tobii': 'Tobii 眼動儀', 'src.mouse-simulator': '滑鼠模擬',
+      segOf: '第 {i}/{n} 段', seg: '段 {i}', tab: '分頁 {n}', clickAt: '點擊 {t}',
+      noEvents: '沒有網頁錄影事件（瀏覽器沒有取得頁面內容）。視線資料與匯出仍可使用。',
+      'note.shot': '背景：完整長截圖（背景瀏覽器另外載入同一頁一次截完，動態內容可能與當時略有不同）',
+      'note.borrowed': '背景：此段落沒拍到畫面，借用同網址其他時間的截圖',
+      'note.tiles': '背景：錄製當下的 {n} 張畫面拼成（灰色＝沒捲到的區域）', 'note.none': '此段落沒有截圖，只顯示座標',
+      'dlg.title': '匯出資料', 'dlg.scope': '範圍', 'dlg.visits': '選擇段落', 'dlg.all': '全選', 'dlg.none': '全不選', 'dlg.cur': '只選目前段落',
+      'dlg.range': '時間範圍', 'dlg.start': '開始', 'dlg.end': '結束', 'dlg.hint': '格式「分:秒」，例如 1:05.5',
+      'dlg.content': '內容', 'f.gaze': '視線樣本', 'f.fix': '注視點', 'f.clicks': '點擊', 'f.mouse': '滑鼠軌跡', 'f.visits': '段落表',
+      cancel: '取消', download: '下載 ZIP', samples: '{n} 樣本',
+      'err.visits': '請至少選一個段落', 'err.range': '時間範圍格式不對（例如 0:12.0 到 0:30.5），結束要晚於開始', 'err.files': '請至少選一種內容',
+      summary: '將匯出 {list}', rows: '{name} <b>{n}</b> 筆', joiner: '、', zipSeg: '段',
+      readme: '視線資料匯出\r\n錄製開始：{start}\r\n範圍：{range}\r\n時間欄位：t_ms 為 Unix 毫秒，t_rel_ms 為距錄製開始的毫秒；座標單位為 CSS 像素。\r\n',
+      rangeVisits: '段落 {list}',
+      'th.graphite': '剪輯台・石墨', 'th.darkroom': '調色室・深藍', 'th.lab': '淺色實驗室', 'th.contrast': '高對比', 'th.paper': '研究報告',
+    },
+    en: {
+      title: 'Gaze replay', theme: 'Style', lang: 'Language', export: 'Export', viewer: 'Website replay', map: 'Full-page gaze map',
+      splitter: 'Drag to resize the replay and the gaze map', layers: 'Gaze map layers',
+      'l.heat': 'Heatmap', 'l.path': 'Scanpath', 'l.mouse': 'Mouse', 'l.clicks': 'Clicks', 'l.labels': 'Time labels',
+      bg: 'Background', 'bg.shot': 'Full-page capture', 'bg.tiles': 'As seen while recording',
+      prevSeg: 'Previous segment', nextSeg: 'Next segment', prevSegKey: 'Previous segment (←)', nextSegKey: 'Next segment (→)',
+      play: 'Play', pause: 'Pause', playKey: 'Play / pause (Space)', speed: 'Playback speed', trail: 'Trail',
+      s03: '0.3 s', s1: '1 s', s3: '3 s',
+      loopText: 'Looping {a} – {b} ({d} s)', loopClear: 'Stop looping', zoom: 'Timeline zoom', fit: 'Fit', fitTip: 'Show the whole recording (press 0)',
+      'lane.time': 'Time', 'lane.visit': 'Segments', 'lane.fix': 'Fixations', 'lane.click': 'Clicks', 'lane.scroll': 'Scroll', 'lane.x': 'Gaze X',
+      rulerTip: 'Drag on the ruler to set a loop range, click to jump; scroll to zoom, Shift+scroll to pan',
+      'nav.visit.prev': 'Previous segment', 'nav.visit.next': 'Next segment', 'nav.fix.prev': 'Previous fixation', 'nav.fix.next': 'Next fixation',
+      'nav.click.prev': 'Previous click', 'nav.click.next': 'Next click',
+      'info.date': 'Date', 'info.source': 'Source', 'info.duration': 'Duration', 'info.visits': 'Segments', 'info.acc': 'Calibration error',
+      'src.webcam': 'Webcam', 'src.tobii': 'Tobii eye tracker', 'src.mouse-simulator': 'Mouse simulator',
+      segOf: 'Segment {i}/{n}', seg: 'Seg {i}', tab: 'Tab {n}', clickAt: 'Click {t}',
+      noEvents: 'No page recording events (the browser did not capture page content). Gaze data and export still work.',
+      'note.shot': 'Background: full-page capture (a background browser loaded the same page and captured it in one shot; dynamic content may differ slightly)',
+      'note.borrowed': 'Background: nothing was captured during this segment, so a capture of the same URL from another time is used',
+      'note.tiles': 'Background: stitched from {n} captures taken while recording (grey = areas never scrolled to)', 'note.none': 'No capture for this segment; showing coordinates only',
+      'dlg.title': 'Export data', 'dlg.scope': 'Range', 'dlg.visits': 'Choose segments', 'dlg.all': 'Select all', 'dlg.none': 'Select none', 'dlg.cur': 'Current segment only',
+      'dlg.range': 'Time range', 'dlg.start': 'Start', 'dlg.end': 'End', 'dlg.hint': 'Format min:sec, e.g. 1:05.5',
+      'dlg.content': 'Contents', 'f.gaze': 'Gaze samples', 'f.fix': 'Fixations', 'f.clicks': 'Clicks', 'f.mouse': 'Mouse trail', 'f.visits': 'Segment list',
+      cancel: 'Cancel', download: 'Download ZIP', samples: '{n} samples',
+      'err.visits': 'Select at least one segment', 'err.range': 'Enter a valid time range (e.g. 0:12.0 to 0:30.5); the end must be after the start', 'err.files': 'Select at least one kind of content',
+      summary: 'Will export {list}', rows: '{name}: <b>{n}</b> rows', joiner: ', ', zipSeg: 'seg',
+      readme: 'Gaze data export\r\nRecording started: {start}\r\nRange: {range}\r\nTime columns: t_ms is Unix time in milliseconds; t_rel_ms is milliseconds since the recording started. Coordinates are in CSS pixels.\r\n',
+      rangeVisits: 'segments {list}',
+      'th.graphite': 'Edit bay · Graphite', 'th.darkroom': 'Grading suite · Navy', 'th.lab': 'Light lab', 'th.contrast': 'High contrast', 'th.paper': 'Research report',
+    },
+  };
+  let LANG = 'zh';
+  const t = (key, vars) => {
+    let s = (I18N[LANG] && I18N[LANG][key]) ?? I18N.zh[key] ?? key;
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(v);
+    return s;
+  };
+  const LOCALE = () => (LANG === 'en' ? 'en-US' : 'zh-TW');
+  const pickLang = () => {
+    const q = new URLSearchParams(location.search).get('lang');
+    const saved = store.get('gazeweb.lang');
+    const v = q || saved || ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en');
+    return I18N[v] ? v : 'zh';
+  };
+  LANG = pickLang();
+  document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-Hant';
+  function translateStatic() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.title = t('title');
+  }
+  translateStatic();
+
+  // ---------- 風格（主題）----------
+  const THEMES = ['graphite', 'darkroom', 'lab', 'contrast', 'paper'];
+  const C = {};
+  const hexRgb = (h) => { h = h.trim().replace('#', ''); if (h.length === 3) h = [...h].map((c) => c + c).join(''); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  const col = (name, a) => { const v = C[name]; if (a == null || !v.startsWith('#')) return v; const [r, g, b] = hexRgb(v); return `rgba(${r},${g},${b},${a})`; };
+  function readTheme() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['gaze', 'fix', 'fix-ink', 'mouse', 'click', 'label-bg', 'label-fix', 'label-click', 'font']) C[k] = cs.getPropertyValue('--' + k).trim();
+  }
+  function applyTheme(name, save) {
+    if (!THEMES.includes(name)) name = 'graphite';
+    document.documentElement.dataset.theme = name;
+    if (save) store.set('gazeweb.theme', name);
+    readTheme();
+    const sel = document.getElementById('themeSel'); if (sel) sel.value = name;
+  }
+  applyTheme(new URLSearchParams(location.search).get('theme') || store.get('gazeweb.theme') || 'graphite', false);
+
+  // ---------- 頂部資訊 ----------
+  const src = m.source || {};
+  const acc = src.calibration && src.calibration.mean_error_deg ? `${src.calibration.mean_error_deg}°` : null;
+  function renderInfo() {
+    $('info').innerHTML = [
+      [t('info.date'), new Date(S0).toLocaleString(LOCALE(), { hour12: false })], [t('info.source'), t('src.' + (src.source || '?'))],
+      [t('info.duration'), fmt(T)], [t('info.visits'), V.length], ...(acc ? [[t('info.acc'), acc]] : []),
+    ].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+  }
+  renderInfo();
+
+  // ---------- 狀態 ----------
+  let tNow = 0, playing = false, cur = Math.max(0, V.findIndex((v) => v.samples > 0)), selection = null;
+  const layers = { heat: false, path: true, mouse: false, clicks: true, labels: true };
+  const byVisit = (arr, col) => { const out = {}; for (const r of arr) (out[r[col]] = out[r[col]] || []).push(r); return out; };
+  const gazeBy = byVisit(D.gaze, 8), fixBy = byVisit(D.fixations, 7), mouseBy = byVisit(D.mouse || [], 5), clickBy = byVisit(D.clicks || [], 5);
+  const visitAt = (t) => { let k = -1; V.forEach((v, i) => { if (rel(v.start_ms) <= t + 1e-6) k = i; }); return k; };
+
+  // ---------- rrweb 回放 ----------
+  const stage = $('stage'), overlay = $('overlay'), octx = overlay.getContext('2d');
+  let replayer = null, t0ev = 0, evDur = 0, vpW = 1, vpH = 1, wrapper = null;
+  if (D.events.length && D.events.some((e) => e.type === 2)) {
+    const first = D.events.findIndex((e) => e.type === 4 || e.type === 2);
+    const events = D.events.slice(Math.max(0, first));
+    t0ev = events[0].timestamp; evDur = events[events.length - 1].timestamp - t0ev;
+    replayer = new rrweb.Replayer(events, { root: stage, skipInactive: false, showWarning: false, mouseTail: false, UNSAFE_replayCanvas: false });
+    wrapper = stage.querySelector('.replayer-wrapper'); wrapper.appendChild(overlay);
+    const meta = events.find((e) => e.type === 4);
+    if (meta) { vpW = meta.data.width; vpH = meta.data.height; }
+    replayer.on('resize', ({ width, height }) => { vpW = width; vpH = height; fit(); });
+    // 回放網頁裡的 <video>/<audio> 沒有原始串流（錄不到），rrweb 重播播放動作時會丟出無害的錯誤，在這裡吞掉
+    const quietMedia = (e) => { if (/supported source|no supported sources|interrupted by a call to pause|NotSupportedError|AbortError/.test(String(e.reason && (e.reason.message || e.reason)))) e.preventDefault(); };
+    addEventListener('unhandledrejection', quietMedia);
+    try { replayer.iframe.contentWindow.addEventListener('unhandledrejection', quietMedia); } catch (_) {}
+    // 回放的網頁會重播「聚焦」動作，把焦點搶進回放框，之後快捷鍵就送不到這一頁。
+    // 焦點一進去就拉回來，並把回放框裡按下的鍵轉送出來。
+    replayer.iframe.setAttribute('tabindex', '-1');
+    addEventListener('blur', () => setTimeout(() => {
+      const a = document.activeElement;
+      if (a && a.tagName === 'IFRAME' && stage.contains(a)) { a.blur(); document.body.focus({ preventScroll: true }); }
+    }, 0));
+    try {
+      replayer.iframe.contentWindow.addEventListener('keydown', (e) => {
+        dispatchEvent(new KeyboardEvent('keydown', { key: e.key, code: e.code, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey }));
+        e.preventDefault();
+      }, true);
+    } catch (_) {}
+    replayer.pause(0);
+  } else {
+    stage.insertAdjacentHTML('beforeend', '<div class="msg" data-i18n="noEvents"></div>'); translateStatic();
+  }
+  function fit() {
+    if (!wrapper) return;
+    const s = Math.min(stage.clientWidth / vpW, stage.clientHeight / vpH, 1);
+    wrapper.style.transform = `scale(${s})`;
+    wrapper.style.left = `${(stage.clientWidth - vpW * s) / 2}px`;
+    overlay.width = vpW; overlay.height = vpH;
+  }
+  new ResizeObserver(fit).observe(stage);
+
+  // ---------- 時間控制 ----------
+  // 時間軸（錄製時間）與 rrweb 回放（第一個頁面事件起算）可能不重疊：重疊時由回放驅動，否則用自己的時鐘
+  let rpRunning = false;
+  function syncReplayer() {
+    if (!replayer) return;
+    const off = tNow * 1000 + S0 - t0ev;
+    if (playing && off >= 0 && off < evDur) { replayer.play(off); rpRunning = true; }
+    else { replayer.pause(Math.min(evDur, Math.max(0, off))); rpRunning = false; }
+  }
+  let syncTimer = 0;
+  function seek(t, keepVisit, lazy) {
+    tNow = Math.min(T, Math.max(0, t));
+    clearTimeout(syncTimer);
+    if (lazy && !playing) syncTimer = setTimeout(syncReplayer, 120); else syncReplayer();
+    if (!keepVisit) { const k = visitAt(tNow); if (k >= 0 && k !== cur) { cur = k; onVisitChange(); } }
+    paintTime();
+  }
+  function setPlaying(p) {
+    playing = p; $('play').textContent = p ? '❚❚' : '▶'; $('play').dataset.i18nAria = p ? 'pause' : 'play'; $('play').setAttribute('aria-label', t(p ? 'pause' : 'play'));
+    if (p && selection && (tNow < selection[0] || tNow >= selection[1] - 0.05)) tNow = selection[0];
+    else if (p && tNow >= T - 0.05) tNow = 0;
+    seek(tNow);
+    lastTs = performance.now();
+  }
+  $('play').onclick = () => setPlaying(!playing);
+  $('speed').onchange = () => replayer && replayer.setConfig({ speed: +$('speed').value });
+  function goVisit(k) { if (!V.length) return; cur = Math.min(V.length - 1, Math.max(0, k)); onVisitChange(); seek(rel(V[cur].start_ms) + 0.01, true, true); }
+  $('prev').onclick = () => goVisit(cur - 1);
+  $('next').onclick = () => goVisit(cur + 1);
+
+  let lastTs = performance.now(), lastMapPaint = 0;
+  function tick(ts) {
+    requestAnimationFrame(tick);
+    if (playing) {
+      if (rpRunning) {
+        tNow = (t0ev + replayer.getCurrentTime() - S0) / 1000;
+        if (replayer.getCurrentTime() >= evDur) rpRunning = false; // 回放事件結束，之後用自己的時鐘
+      } else {
+        tNow += (ts - lastTs) / 1000 * (+$('speed').value);
+        if (replayer) { const off = tNow * 1000 + S0 - t0ev; if (off >= 0 && off < evDur) syncReplayer(); }
+      }
+      if (selection && (tNow >= selection[1] || tNow < selection[0] - 0.25)) seek(selection[0]); // 到區段結尾就回到開頭
+      else if (tNow >= T) { tNow = T; setPlaying(false); }
+      const k = visitAt(tNow); if (k >= 0 && k !== cur) { cur = k; onVisitChange(); }
+      paintTime();
+      if (ts - lastMapPaint > 150) { lastMapPaint = ts; drawLayers(); }
+    }
+    lastTs = ts;
+    drawViewerOverlay();
+  }
+
+  function drawViewerOverlay() {
+    if (!replayer) return;
+    const now = S0 + tNow * 1000, trail = +$('trail').value;
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    const G = D.gaze, a = lower(G, now - trail), b = lower(G, now + 1);
+    octx.lineCap = 'round';
+    for (let i = a + 1; i < b; i++) {
+      const p = G[i - 1], q = G[i]; if (q[0] - p[0] > 200 || q[8] !== p[8]) continue;
+      const k = (q[0] - (now - trail)) / trail;
+      octx.strokeStyle = col('gaze', 0.65 * k); octx.lineWidth = 2 + 4 * k;
+      octx.beginPath(); octx.moveTo(p[1], p[2]); octx.lineTo(q[1], q[2]); octx.stroke();
+    }
+    const last = G[b - 1];
+    if (last && now - last[0] < 150) {
+      const g = octx.createRadialGradient(last[1], last[2], 0, last[1], last[2], 26);
+      g.addColorStop(0, col('gaze', .75)); g.addColorStop(1, col('gaze', 0));
+      octx.fillStyle = g; octx.beginPath(); octx.arc(last[1], last[2], 26, 0, 7); octx.fill();
+      octx.fillStyle = col('gaze'); octx.beginPath(); octx.arc(last[1], last[2], 4, 0, 7); octx.fill();
+    }
+  }
+
+  // ---------- 整頁視線圖 ----------
+  const bgC = $('mapBg'), fxC = $('mapFx'), bgX = bgC.getContext('2d'), fxX = fxC.getContext('2d');
+  const imgCache = {};
+  const getImg = (src) => imgCache[src] || (imgCache[src] = Object.assign(new Image(), { src }));
+  let mapK = 1, mapW = 0, mapH = 0;
+  function onVisitChange() {
+    const v = V[cur]; if (!v) return;
+    $('segTitle').textContent = `${t('segOf', { i: cur + 1, n: V.length })}　${fmt(rel(v.start_ms))}–${fmt(rel(v.end_ms))}　${v.title || v.url}`;
+    $('seginfo').innerHTML = `<b>${t('seg', { i: cur + 1 })}</b>　${v.url}`;
+    $('prev').disabled = cur === 0; $('next').disabled = cur === V.length - 1;
+    document.querySelectorAll('.clip').forEach((c, i) => c.setAttribute('aria-current', i === cur));
+    $('mapWrap').scrollTop = 0;
+    layoutMap();
+  }
+  function layoutMap() {
+    const v = V[cur], wrap = $('mapWrap'); if (!v || !wrap.clientWidth) return;
+    const hasShot = !!v.shot, hasTiles = (v.tiles || []).length > 0;
+    $('bgSel').disabled = !(hasShot && hasTiles);
+    const useShot = hasShot && ($('bgSel').value === 'shot' || !hasTiles);
+    const tiles = useShot ? [] : (v.tiles || []).slice().sort((a, b) => (!!b.blank - !!a.blank) || (a.t - b.t));
+    const imgs = useShot ? [getImg(v.shot.file)] : tiles.map((t) => getImg(t.file));
+    if (imgs.some((im) => !im.complete)) { imgs.forEach((im) => im.addEventListener('load', () => requestAnimationFrame(layoutMap), { once: true })); }
+    const pts = gazeBy[v.index] || [];
+    let W = 0, H = 0;
+    if (useShot) { W = imgs[0].naturalWidth || v.shot.width; H = imgs[0].naturalHeight || v.shot.height; }
+    else tiles.forEach((t) => { W = Math.max(W, t.sx + t.w); H = Math.max(H, t.sy + t.h); });
+    for (const p of pts) { W = Math.max(W, p[3] + 40); H = Math.max(H, p[4] + 40); }
+    W = Math.max(W, 400); H = Math.max(H, 300);
+    mapK = Math.min(1, (wrap.clientWidth - 2) / W); mapW = Math.round(W * mapK); mapH = Math.round(H * mapK);
+    for (const c of [bgC, fxC]) { c.width = mapW; c.height = mapH; }
+    $('mapInner').style.width = mapW + 'px';
+    bgX.fillStyle = tiles.length ? '#d9d9d4' : '#ffffff'; bgX.fillRect(0, 0, mapW, mapH);
+    if (useShot) { if (imgs[0].naturalWidth) bgX.drawImage(imgs[0], 0, 0, imgs[0].naturalWidth * mapK, imgs[0].naturalHeight * mapK); }
+    else tiles.forEach((t, i) => imgs[i].naturalWidth && bgX.drawImage(imgs[i], t.sx * mapK, t.sy * mapK, t.w * mapK, t.h * mapK));
+    $('mapNote').textContent = useShot ? t('note.shot')
+      : tiles.length ? (v.tiles_borrowed ? t('note.borrowed') : t('note.tiles', { n: tiles.length }))
+      : t('note.none');
+    drawLayers();
+  }
+  function heat(pts, k) {
+    const s = 0.5, w = Math.max(1, Math.round(mapW * s)), h = Math.max(1, Math.round(mapH * s));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); const r = 30 * k * s + 4;
+    for (const p of pts) { const g = x.createRadialGradient(p[3] * k * s, p[4] * k * s, 0, p[3] * k * s, p[4] * k * s, r);
+      g.addColorStop(0, 'rgba(0,0,0,0.08)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(p[3] * k * s - r, p[4] * k * s - r, 2 * r, 2 * r); }
+    const img = x.getImageData(0, 0, w, h), d = img.data; let max = 0;
+    for (let i = 3; i < d.length; i += 4) max = Math.max(max, d[i]);
+    for (let i = 0; i < d.length; i += 4) {
+      const v = max ? d[i + 3] / max : 0;
+      const [rr, gg, bb] = v < 0.33 ? [0, v * 3 * 255, 255] : v < 0.66 ? [(v - 0.33) * 3 * 255, 255, 255 * (1 - (v - 0.33) * 3)] : [255, 255 * (1 - (v - 0.66) * 3), 0];
+      d[i] = rr; d[i + 1] = gg; d[i + 2] = bb; d[i + 3] = v < 0.04 ? 0 : 80 + v * 140;
+    }
+    x.putImageData(img, 0, 0); fxX.drawImage(c, 0, 0, mapW, mapH);
+  }
+  function label(text, x, y, color) {
+    fxX.font = `500 11px ${C.font}`; const w = fxX.measureText(text).width + 8;
+    fxX.fillStyle = C['label-bg']; fxX.fillRect(x, y - 8, w, 16); fxX.fillStyle = color; fxX.textAlign = 'left'; fxX.textBaseline = 'middle'; fxX.fillText(text, x + 4, y);
+  }
+  function drawLayers() {
+    const v = V[cur]; if (!v || !mapW) return;
+    const k = mapK, now = S0 + tNow * 1000, inVisit = tNow >= rel(v.start_ms) - 0.5;
+    const past = (t) => !inVisit || t <= now; // 播放頭之後的資料淡化
+    fxX.clearRect(0, 0, mapW, mapH);
+    if (layers.heat) heat(gazeBy[v.index] || [], k);
+    if (layers.mouse) {
+      const M = mouseBy[v.index] || [];
+      fxX.lineWidth = 1.5; fxX.lineJoin = 'round';
+      for (let i = 1; i < M.length; i++) {
+        if (M[i][0] - M[i - 1][0] > 1500) continue;
+        fxX.strokeStyle = past(M[i][0]) ? col('mouse', .8) : col('mouse', .18);
+        fxX.beginPath(); fxX.moveTo(M[i - 1][3] * k, M[i - 1][4] * k); fxX.lineTo(M[i][3] * k, M[i][4] * k); fxX.stroke();
+      }
+      const lastM = M.filter((r) => r[0] <= now).pop();
+      if (lastM && inVisit) { fxX.fillStyle = col('mouse'); fxX.beginPath(); fxX.moveTo(lastM[3] * k, lastM[4] * k); fxX.lineTo(lastM[3] * k + 4, lastM[4] * k + 13); fxX.lineTo(lastM[3] * k + 10, lastM[4] * k + 9); fxX.fill(); }
+    }
+    if (layers.path) {
+      const F = fixBy[v.index] || [];
+      fxX.lineWidth = 1.5; fxX.strokeStyle = col('fix', .6);
+      fxX.beginPath(); F.forEach((f, i) => i ? fxX.lineTo(f[4] * k, f[5] * k) : fxX.moveTo(f[4] * k, f[5] * k)); fxX.stroke();
+      F.forEach((f, i) => {
+        const r = 6 + Math.sqrt(f[1]) * 0.9, x = f[4] * k, y = f[5] * k, on = past(f[0]);
+        fxX.fillStyle = on ? col('fix', .85) : col('fix', .22); fxX.strokeStyle = col('fix-ink'); fxX.lineWidth = 1;
+        fxX.beginPath(); fxX.arc(x, y, r, 0, 7); fxX.fill(); fxX.stroke();
+        fxX.fillStyle = col('fix-ink'); fxX.font = `700 10px ${C.font}`; fxX.textAlign = 'center'; fxX.textBaseline = 'middle'; fxX.fillText(String(i + 1), x, y);
+        if (layers.labels && on) label(`${fmt(rel(f[0]))} · ${Math.round(f[1])}ms`, x + r + 3, y, C['label-fix']);
+      });
+    }
+    if (layers.clicks) {
+      (clickBy[v.index] || []).forEach((c) => {
+        const x = c[3] * k, y = c[4] * k, on = past(c[0]);
+        fxX.strokeStyle = on ? col('click') : col('click', .25); fxX.lineWidth = 2;
+        fxX.beginPath(); fxX.arc(x, y, 9, 0, 7); fxX.stroke();
+        fxX.beginPath(); fxX.moveTo(x - 4, y); fxX.lineTo(x + 4, y); fxX.moveTo(x, y - 4); fxX.lineTo(x, y + 4); fxX.stroke();
+        if (layers.labels && on) label(t('clickAt', { t: fmt(rel(c[0])) }), x + 12, y - 12, C['label-click']);
+      });
+    }
+    // 目前可視範圍框
+    const box = $('vpbox'), G = gazeBy[v.index] || [];
+    const g = inVisit ? G[Math.max(0, lower(G, now) - 1)] : null;
+    const ih = (m.urls && m.urls[v.url] && m.urls[v.url].ih) || 0;
+    if (g && ih && g[0] <= now + 500) { box.style.display = 'block'; box.style.top = `${(g[4] - g[2]) * k}px`; box.style.height = `${ih * k}px`; }
+    else box.style.display = 'none';
+  }
+  document.querySelectorAll('.chip').forEach((c) => c.onclick = () => {
+    const l = c.dataset.layer; layers[l] = !layers[l]; c.setAttribute('aria-pressed', layers[l]); store.set('gazeweb.layers', JSON.stringify(layers)); drawLayers();
+  });
+  try { Object.assign(layers, JSON.parse(store.get('gazeweb.layers') || '{}')); } catch (_) {}
+  document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', !!layers[c.dataset.layer]));
+  $('bgSel').onchange = layoutMap;
+  new ResizeObserver(() => layoutMap()).observe($('mapWrap'));
+
+  // ---------- 可拖曳的分隔 ----------
+  const mons = $('monitors'), sp = $('splitter');
+  const setSplit = (p) => { p = Math.min(80, Math.max(20, p)); document.documentElement.style.setProperty('--split', `${p}%`); sp.setAttribute('aria-valuenow', Math.round(p)); store.set('gazeweb.split', p); };
+  setSplit(+store.get('gazeweb.split') || 58);
+  sp.addEventListener('pointerdown', (e) => {
+    sp.setPointerCapture(e.pointerId); sp.classList.add('dragging'); document.body.classList.add('resizing');
+    const r = mons.getBoundingClientRect();
+    const move = (ev) => setSplit(100 * (ev.clientX - r.left - 8) / (r.width - 24));
+    const up = () => { sp.classList.remove('dragging'); document.body.classList.remove('resizing'); sp.removeEventListener('pointermove', move); sp.removeEventListener('pointerup', up); };
+    sp.addEventListener('pointermove', move); sp.addEventListener('pointerup', up);
+  });
+  sp.addEventListener('keydown', (e) => {
+    const p = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--split'));
+    if (e.key === 'ArrowLeft') { setSplit(p - 5); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === 'ArrowRight') { setSplit(p + 5); e.preventDefault(); e.stopPropagation(); }
+  });
+  sp.addEventListener('dblclick', () => setSplit(58));
+
+  // ---------- 時間軸（可縮放：v0–v1 是目前看得到的時間範圍）----------
+  let v0 = 0, v1 = T;
+  const MIN_SPAN = Math.min(T, 1);              // 最多放大到 1 秒佔滿整條時間軸
+  const MAX_ZOOM = T / MIN_SPAN;
+  const span = () => v1 - v0;
+  const pct = (s) => `${(100 * (s - v0) / span()).toFixed(4)}%`;   // 時間 → 在可視範圍中的位置
+  const len = (d) => `${(100 * d / span()).toFixed(4)}%`;          // 時間長度 → 寬度
+  const visible = (a, b) => b >= v0 && a <= v1;
+  const TICKS = [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800, 3600];
+  function buildLanes() {
+    const sp = span(), step = TICKS.find((x) => sp / x <= 12) || 7200, minor = step / 5;
+    const tickLabel = (x) => (step < 1 ? fmt(x) : fmt(x).replace(/\.0$/, ''));
+    let rh = '';
+    for (let k = Math.ceil(v0 / minor - 1e-9); k * minor <= v1 + 1e-9; k++) {
+      const x = Math.round(k * minor * 1000) / 1000, major = k % 5 === 0;
+      rh += `<i class="${major ? 'mj' : 'mn'}" style="left:${pct(x)}"></i>` + (major ? `<span style="left:${pct(x)}">${tickLabel(x)}</span>` : '');
+    }
+    $('ruler').innerHTML = rh;
+    $('laneVisit').innerHTML = V.map((v, i) => {
+      const a = rel(v.start_ms), b = rel(v.end_ms); if (!visible(a, b)) return '';
+      const pad = a < v0 ? `padding-left:calc(${len(v0 - a)} + 6px);` : ''; // 段落開頭在畫面左邊外時，文字仍顯示在可見處
+      return `<button class="clip" data-i="${i}" style="left:${pct(a)};width:calc(${len(b - a)} - 2px);${pad}--h:${TAB_HUES[((v.tab || 1) - 1) % TAB_HUES.length]}"
+      aria-current="${i === cur}" title="${t('segOf', { i: i + 1, n: V.length })}　${fmt(a)}–${fmt(b)}　${t('tab', { n: v.tab })}&#10;${(v.title || '').replace(/"/g, '&quot;')}&#10;${v.url}">${i + 1}　${v.title || v.url}</button>`;
+    }).join('');
+    $('laneFix').innerHTML = D.fixations.filter((f) => visible(rel(f[0]), rel(f[0]) + f[1] / 1000))
+      .map((f) => `<i class="fixbar" style="left:${pct(rel(f[0]))};width:max(2px, ${len(f[1] / 1000)})" title="${fmt(rel(f[0]))} · ${Math.round(f[1])}ms"></i>`).join('');
+    $('laneClick').innerHTML = (D.clicks || []).filter((c) => visible(rel(c[0]), rel(c[0])))
+      .map((c) => `<i class="ctick" style="left:${pct(rel(c[0]))}" title="${t('clickAt', { t: fmt(rel(c[0])) })}"></i>`).join('');
+    const tr = D.track || { step_ms: 250, x: [], scroll: [] }, dt = tr.step_ms / 1000;
+    const i0 = Math.max(0, Math.floor(v0 / dt) - 1), i1 = Math.ceil(v1 / dt) + 1;
+    const path = (arr, f) => { let d = '', pen = false; for (let i = i0; i <= Math.min(i1, arr.length - 1); i++) { const p = arr[i]; if (p == null) { pen = false; continue; } d += `${pen ? 'L' : 'M'}${(100 * (i * dt - v0) / sp).toFixed(3)},${(23 - f(p) * 20).toFixed(1)}`; pen = true; } return d; };
+    const maxS = Math.max(1, ...tr.scroll.filter((x) => x != null));
+    $('laneScroll').innerHTML = `<svg viewBox="0 0 100 26" preserveAspectRatio="none"><path d="${path(tr.scroll, (x) => x / maxS)}" fill="none" style="stroke:var(--sel)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+    $('laneX').innerHTML = `<svg viewBox="0 0 100 26" preserveAspectRatio="none"><path d="${path(tr.x, (q) => Math.min(1, Math.max(0, q)))}" fill="none" style="stroke:var(--gaze)" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  buildLanes();
+
+  // 縮放與平移
+  let lanesRaf = 0, hsSyncing = false;
+  function refreshLanes() {
+    cancelAnimationFrame(lanesRaf);
+    lanesRaf = requestAnimationFrame(() => { buildLanes(); placePlayhead(); if (selection) showLoop(selection[0], selection[1]); });
+  }
+  function setView(a, b) {
+    const sp = Math.min(T, Math.max(MIN_SPAN, b - a));
+    v0 = Math.max(0, Math.min(T - sp, a)); v1 = v0 + sp;
+    const z = T / sp;
+    $('zoom').value = Math.round(1000 * Math.log(z) / Math.log(Math.max(1.0001, MAX_ZOOM)));
+    $('zoomVal').textContent = `${z < 10 ? z.toFixed(1) : Math.round(z)}×`;
+    const hs = $('hscroll'), inner = $('hsInner');
+    inner.style.width = `${100 * z}%`;
+    hsSyncing = true; hs.scrollLeft = (hs.scrollWidth - hs.clientWidth) * (T - sp > 0 ? v0 / (T - sp) : 0);
+    requestAnimationFrame(() => { hsSyncing = false; });
+    refreshLanes();
+  }
+  function zoomAt(factor, anchor) {
+    const sp = Math.min(T, Math.max(MIN_SPAN, span() / factor)), f = (anchor - v0) / span();
+    setView(anchor - f * sp, anchor - f * sp + sp);
+  }
+  const zoomAnchor = () => (tNow >= v0 && tNow <= v1 ? tNow : (v0 + v1) / 2);
+  $('zoom').addEventListener('input', () => {
+    const z = Math.exp(+$('zoom').value / 1000 * Math.log(Math.max(1.0001, MAX_ZOOM)));
+    zoomAt(span() / (T / z), zoomAnchor());
+  });
+  $('zoomFit').onclick = () => setView(0, T);
+  $('hscroll').addEventListener('scroll', () => {
+    if (hsSyncing) return;
+    const hs = $('hscroll'), sp = span(), max = hs.scrollWidth - hs.clientWidth;
+    v0 = max > 0 ? (T - sp) * hs.scrollLeft / max : 0; v1 = v0 + sp; refreshLanes();
+  });
+  function placePlayhead() {
+    const ph = $('playhead'), inView = tNow >= v0 - 1e-6 && tNow <= v1 + 1e-6;
+    ph.style.display = inView ? 'block' : 'none'; ph.style.left = pct(tNow);
+  }
+  function paintTime() {
+    $('tc').innerHTML = `${fmt(tNow)} <small>/ ${fmt(T)}</small>`;
+    // 播放頭跑出可視範圍：播放中翻到下一頁，否則把它置中
+    if (span() < T - 1e-6 && (tNow < v0 || tNow > v1)) {
+      const sp = span(); setView(playing ? tNow - sp * 0.05 : tNow - sp / 2, (playing ? tNow - sp * 0.05 : tNow - sp / 2) + sp);
+    }
+    placePlayhead();
+    paintNav();
+  }
+  const lanes = $('lanes'), tAtX = (x) => v0 + span() * Math.min(1, Math.max(0, (x - lanes.getBoundingClientRect().left) / lanes.clientWidth));
+  // 滾輪：縮放（以滑鼠位置為中心）；Shift＋滾輪或觸控板橫向滑動：平移
+  lanes.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const horizontal = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+    if (horizontal) { const d = (e.shiftKey ? e.deltaY || e.deltaX : e.deltaX) / lanes.clientWidth * span(); setView(v0 + d, v1 + d); return; }
+    zoomAt(Math.exp(-e.deltaY * 0.0015), tAtX(e.clientX));
+  }, { passive: false });
+  lanes.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const onRuler = e.target.closest('.ruler');
+    if (!onRuler) { seek(tAtX(e.clientX), false, true); drawLayers(); return; }
+    // 在尺規上拖曳：設定 A–B 循環播放區段；只點一下則跳到該時間
+    lanes.setPointerCapture(e.pointerId);
+    const a = tAtX(e.clientX); let b = a, dragging = false;
+    const move = (ev) => { b = tAtX(ev.clientX); if (Math.abs(b - a) >= span() * 0.004) { dragging = true; showLoop(Math.min(a, b), Math.max(a, b)); } };
+    const up = () => {
+      lanes.removeEventListener('pointermove', move); lanes.removeEventListener('pointerup', up);
+      if (!dragging) { seek(a, false, true); drawLayers(); return; }
+      setLoop(Math.min(a, b), Math.max(a, b));
+    };
+    lanes.addEventListener('pointermove', move); lanes.addEventListener('pointerup', up);
+  });
+  // ---------- A–B 循環播放 ----------
+  function showLoop(a, b) {
+    const box = $('selbox');
+    box.style.display = 'block'; box.style.left = pct(a); box.style.width = len(b - a);
+    $('seltext').textContent = t('loopText', { a: fmt(a), b: fmt(b), d: (b - a).toFixed(1) }); $('selinfo').classList.add('on');
+  }
+  function setLoop(a, b) {
+    if (a == null) { selection = null; $('selbox').style.display = 'none'; $('selinfo').classList.remove('on'); return; }
+    selection = [a, b]; showLoop(a, b);
+    seek(a); if (!playing) setPlaying(true); // 框選後立刻從區段開頭開始循環播放
+  }
+  $('selClear').onclick = () => setLoop(null);
+
+  // ---------- 時間軸右側 ◀ ▶：跳到上一個／下一個段落、注視點、點擊 ----------
+  const TIMES = {
+    visit: V.map((v) => rel(v.start_ms)),
+    fix: D.fixations.map((f) => rel(f[0])),
+    click: (D.clicks || []).map((c) => rel(c[0])),
+  };
+  const EPS = 0.05;
+  const countUpTo = (arr, x) => { let lo = 0, hi = arr.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid] <= x) lo = mid + 1; else hi = mid; } return lo; };
+  function jump(kind, dir) {
+    if (kind === 'visit') { goVisit(cur + dir); return; }
+    // 目前計數 k＝播放頭之前（含）已發生幾個；◀ 一定到第 k-1 個、▶ 到第 k+1 個，數字每按一次就變一次
+    const arr = TIMES[kind], k = countUpTo(arr, tNow + EPS);
+    const idx = dir > 0 ? k : k - 2;
+    if (idx < 0 || idx >= arr.length) return;
+    const target = arr[idx];
+    if (playing) setPlaying(false);
+    seek(target + 0.001, false, true); drawLayers(); revealOnMap(kind, target);
+  }
+  // 把跳到的注視點／點擊捲進視線圖可視範圍
+  function revealOnMap(kind, tt) {
+    const v = V[cur]; if (!v) return;
+    const list = kind === 'fix' ? (fixBy[v.index] || []) : (clickBy[v.index] || []);
+    const item = list.find((r) => Math.abs(rel(r[0]) - tt) < 0.01); if (!item) return;
+    const y = (kind === 'fix' ? item[5] : item[4]) * mapK, wrap = $('mapWrap');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wrap.scrollTo({ top: Math.max(0, y - wrap.clientHeight / 2), behavior: reduce ? 'auto' : 'smooth' });
+  }
+  document.querySelectorAll('.nav button').forEach((b) => { b.onclick = () => jump(b.closest('.nav').dataset.kind, +b.dataset.dir); });
+  function paintNav() {
+    for (const nav of document.querySelectorAll('.nav')) {
+      const kind = nav.dataset.kind, arr = TIMES[kind], [pb, nb] = nav.querySelectorAll('button');
+      const k = kind === 'visit' ? cur + 1 : countUpTo(arr, tNow + EPS);
+      nav.querySelector('.cnt').textContent = arr.length ? `${k}/${arr.length}` : '0';
+      pb.disabled = kind === 'visit' ? cur <= 0 : k <= 1;
+      nb.disabled = kind === 'visit' ? cur >= V.length - 1 : k >= arr.length;
+    }
+  }
+
+  // ---------- 匯出 ----------
+  const dlg = $('dlg'), X = D.export;
+  function renderVlist() {
+    const was = new Set([...dlg.querySelectorAll('input[name=v]')].filter((c) => !c.checked).map((c) => +c.value));
+    $('vlist').innerHTML = V.map((v, i) => `<label class="vrow"><input type="checkbox" name="v" value="${v.index}" ${was.has(v.index) ? '' : 'checked'}>
+      <span class="t">${t('seg', { i: i + 1 })}</span><span class="t">${fmt(rel(v.start_ms))}–${fmt(rel(v.end_ms))}</span><span class="ti">${v.title || v.url}</span><span class="c">${t('samples', { n: v.samples || 0 })}</span></label>`).join('');
+  }
+  renderVlist();
+  const scope = () => dlg.querySelector('input[name=scope]:checked').value;
+  const selectedVisits = () => new Set([...dlg.querySelectorAll('input[name=v]:checked')].map((c) => +c.value));
+  const setV = (fn) => { dlg.querySelectorAll('input[name=v]').forEach((c, i) => { c.checked = fn(c, i); }); dlg.querySelector('input[value=visits]').checked = true; summarize(); };
+  $('allV').onclick = () => setV(() => true); $('noneV').onclick = () => setV(() => false); $('curV').onclick = () => setV((c) => +c.value === (V[cur] && V[cur].index));
+  ['rangeA', 'rangeB'].forEach((id) => $(id).addEventListener('input', () => { dlg.querySelector('input[value=range]').checked = true; summarize(); }));
+  dlg.addEventListener('change', summarize);
+
+  function filterSpec() {
+    if (scope() === 'visits') { const s = selectedVisits(); return { ok: s.size > 0, err: t('err.visits'), inVisit: (vi) => s.has(vi), inTime: () => true, label: `${t('zipSeg')}${[...s].sort((a, b) => a - b).join('-')}` }; }
+    const a = parseT($('rangeA').value), b = parseT($('rangeB').value);
+    const ok = isFinite(a) && isFinite(b) && b > a && a >= 0;
+    return { ok, err: t('err.range'), inVisit: () => true, inTime: (t) => t >= a && t <= b,
+             overlaps: (s, e) => s <= b && e >= a,
+             label: `${fmt(a).replace(':', 'm').replace('.', 's')}-${fmt(b).replace(':', 'm').replace('.', 's')}` };
+  }
+  function tables(spec) {
+    const out = {}, want = new Set([...dlg.querySelectorAll('input[name=f]:checked')].map((c) => c.value));
+    const pick = (tab, tcol, vcol, isRange) => {
+      const ci = (n) => tab.columns.indexOf(n), it = ci(tcol), iv = ci(vcol);
+      return tab.rows.filter((r) => {
+        if (scope() === 'visits') return spec.inVisit(r[iv]);
+        // 有持續時間的資料（段落、注視點）：只要和選取範圍有重疊就算
+        if (isRange) { const s = r[ci('start_rel_ms')] / 1000, e = s + r[ci('duration_ms')] / 1000; return spec.overlaps(s, e); }
+        return spec.inTime(r[it] / 1000);
+      });
+    };
+    if (want.has('gaze')) out['gaze.csv'] = { columns: X.gaze.columns, rows: pick(X.gaze, 't_rel_ms', 'visit') };
+    if (want.has('fixations')) out['fixations.csv'] = { columns: X.fixations.columns, rows: pick(X.fixations, 'start_rel_ms', 'visit', true) };
+    if (want.has('visits')) out['visits.csv'] = { columns: X.visits.columns, rows: pick(X.visits, 'start_rel_ms', 'visit', true) };
+    const ev = (arr, name) => {
+      const cols = ['t_ms', 't_rel_ms', 'viewport_x', 'viewport_y', 'page_x', 'page_y', 'visit', 'url'];
+      const rows = arr.filter((r) => scope() === 'visits' ? spec.inVisit(r[5]) : spec.inTime(rel(r[0])))
+        .map((r) => { const v = V.find((x) => x.index === r[5]); return [r[0], Math.round(r[0] - S0), r[1], r[2], r[3], r[4], r[5], v ? v.url : '']; });
+      out[name] = { columns: cols, rows, raw: true };
+    };
+    if (want.has('clicks')) ev(D.clicks || [], 'clicks.csv');
+    if (want.has('mouse')) ev(D.mouse || [], 'mouse.csv');
+    return out;
+  }
+  function summarize() {
+    const spec = filterSpec(), btn = $('doExport'), sum = $('summary');
+    if (!spec.ok) { sum.innerHTML = `<span class="error">${spec.err}</span>`; btn.disabled = true; return; }
+    const tb = tables(spec), names = Object.keys(tb);
+    if (!names.length) { sum.innerHTML = `<span class="error">${t('err.files')}</span>`; btn.disabled = true; return; }
+    btn.disabled = false;
+    sum.innerHTML = t('summary', { list: names.map((n) => t('rows', { name: n, n: tb[n].rows.length })).join(t('joiner')) });
+  }
+  const csvCell = (v) => v == null ? '' : (typeof v === 'string' && /[",\n]/.test(v)) ? `"${v.replace(/"/g, '""')}"` : String(v);
+  function toCSV(tab) {
+    const ui = tab.raw ? -1 : tab.columns.indexOf('url');
+    const lines = [tab.columns.join(',')];
+    for (const r of tab.rows) lines.push(r.map((v, i) => csvCell(i === ui && v != null ? X.urls[v] : v)).join(','));
+    return '﻿' + lines.join('\r\n') + '\r\n'; // BOM：Excel 直接開中文不亂碼
+  }
+  // 最小 ZIP（不壓縮）：多個 CSV 打包成一個檔案下載
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = (u8) => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(files) {
+    const enc = new TextEncoder(), parts = [], central = []; let offset = 0;
+    const d = new Date(), dosT = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), dosD = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    for (const [name, text] of files) {
+      const nm = enc.encode(name), data = enc.encode(text), crc = crc32(data);
+      const h = new DataView(new ArrayBuffer(30));
+      [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [8, 0, 2], [10, dosT, 2], [12, dosD, 2], [14, crc, 4], [18, data.length, 4], [22, data.length, 4], [26, nm.length, 2], [28, 0, 2]]
+        .forEach(([o, v, n]) => n === 4 ? h.setUint32(o, v, true) : h.setUint16(o, v, true));
+      parts.push(h, nm, data);
+      const c = new DataView(new ArrayBuffer(46));
+      [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [10, 0, 2], [12, dosT, 2], [14, dosD, 2], [16, crc, 4], [20, data.length, 4], [24, data.length, 4], [28, nm.length, 2], [30, 0, 2], [32, 0, 2], [34, 0, 2], [36, 0, 2], [38, 0, 4], [42, offset, 4]]
+        .forEach(([o, v, n]) => n === 4 ? c.setUint32(o, v, true) : c.setUint16(o, v, true));
+      central.push(c, nm);
+      offset += 30 + nm.length + data.length;
+    }
+    const csize = central.reduce((s, p) => s + p.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+    [[0, 0x06054b50, 4], [8, files.length, 2], [10, files.length, 2], [12, csize, 4], [16, offset, 4]].forEach(([o, v, n]) => n === 4 ? e.setUint32(o, v, true) : e.setUint16(o, v, true));
+    return new Blob([...parts, ...central, e], { type: 'application/zip' });
+  }
+  function openExport(range) {
+    if (range) { $('rangeA').value = fmt(range[0]); $('rangeB').value = fmt(range[1]); dlg.querySelector('input[value=range]').checked = true; }
+    else if (!$('rangeA').value) { $('rangeA').value = fmt(0); $('rangeB').value = fmt(T); }
+    summarize(); if (playing) setPlaying(false); dlg.showModal();
+  }
+  $('exportBtn').onclick = () => openExport(null);
+  $('dlgForm').addEventListener('submit', (e) => {
+    if (e.submitter && e.submitter.value === 'cancel') return;
+    const spec = filterSpec(); if (!spec.ok) { e.preventDefault(); summarize(); return; }
+    const tb = tables(spec);
+    const files = Object.entries(tb).map(([n, tab]) => [n, toCSV(tab)]);
+    files.push(['README.txt', t('readme', {
+      start: new Date(S0).toLocaleString(LOCALE(), { hour12: false }),
+      range: scope() === 'visits' ? t('rangeVisits', { list: [...selectedVisits()].join(', ') }) : `${$('rangeA').value} – ${$('rangeB').value}`,
+    })]);
+    const a = document.createElement('a'), d = new Date(S0);
+    a.href = URL.createObjectURL(zip(files));
+    a.download = `gaze_${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}_${spec.label}.zip`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+
+  // ---------- 風格切換 ----------
+  function renderThemeOptions() {
+    $('themeSel').innerHTML = THEMES.map((k) => `<option value="${k}">${t('th.' + k)}</option>`).join('');
+    $('themeSel').value = document.documentElement.dataset.theme;
+  }
+  renderThemeOptions();
+
+  // ---------- 語言切換 ----------
+  function applyLang(lang) {
+    LANG = I18N[lang] ? lang : 'zh'; store.set('gazeweb.lang', LANG);
+    document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-Hant';
+    translateStatic(); renderInfo(); renderThemeOptions(); buildLanes(); renderVlist();
+    if (V.length) onVisitChange();
+    if (selection) showLoop(selection[0], selection[1]);
+    paintTime(); if (dlg.open) summarize();
+  }
+  $('langSel').value = LANG;
+  $('langSel').onchange = () => applyLang($('langSel').value);
+  $('themeSel').onchange = () => { applyTheme($('themeSel').value, true); drawLayers(); };
+
+  // ---------- 鍵盤 ----------
+  addEventListener('keydown', (e) => {
+    if (dlg.open || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goVisit(cur - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goVisit(cur + 1); }
+    if (e.key === 'Escape') setLoop(null);
+    if (e.key === '+' || e.key === '=') zoomAt(1.5, zoomAnchor());
+    if (e.key === '-' || e.key === '_') zoomAt(1 / 1.5, zoomAnchor());
+    if (e.key === '0') setView(0, T);
+  });
+
+  if (V.length) { onVisitChange(); seek(rel(V[cur].start_ms) + 0.01, true); } else paintTime();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
